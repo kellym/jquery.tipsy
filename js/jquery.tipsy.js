@@ -149,17 +149,33 @@
 
                         return title;
                     },
+                    _getSize: function() {
+                      var scrollTop = s.scrollTop(),
+                          scrollLeft = s.scrollLeft(),
+                          outerHeight = s.outerHeight(),
+                          outerWidth = s.outerWidth(),
+                          scrollBottom = scrollTop + outerHeight,
+                          scrollRight = scrollLeft + outerWidth,
+                          offset = s.offset(),
+                          elBottom = offset.top + outerHeight,
+                          elRight = offset.left + outerWidth,
+                          visibleTop = offset.top < scrollTop ? scrollTop : offset.top,
+                          visibleLeft = offset.left < scrollLeft ? scrollLeft : offset.left,
+                          visibleBottom = elBottom > scrollBottom ? scrollBottom : elBottom,
+                          visibleRight = elRight > scrollRight ? scrollRight: elRight;
+                      return {
+                        offsetTop: visibleTop,
+                        offsetLeft: visibleLeft,
+                        width: visibleBottom - visibleTop,
+                        height: visibleRight - visibleLeft
+                      };
+                    },
                     _position: function(a){
                         var css = {top: 0, left: 0},
                             position = (a ? a : (f.hasAttr(n.attr+'-position') ? s.attr(n.attr+'-position') : n.position)),
                             arrow = position.split('-'),
                             offset = (f.hasAttr(n.attr+'-offset') ? s.attr(n.attr+'-offset') : n.offset),
-                            style = {
-                                offsetTop:  s.offset().top,
-                                offsetLeft: s.offset().left,
-                                width: s.outerWidth(),
-                                height: s.outerHeight()
-                            },
+                            style = f._getSize(),
                             tStyle = {
                                 width: o.outerWidth(),
                                 height: o.outerHeight()
