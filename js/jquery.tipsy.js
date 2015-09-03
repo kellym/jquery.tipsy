@@ -150,24 +150,37 @@
                         return title;
                     },
                     _getSize: function() {
-                      var scrollTop = s.scrollTop(),
-                          scrollLeft = s.scrollLeft(),
-                          outerHeight = s.outerHeight(),
-                          outerWidth = s.outerWidth(),
-                          scrollBottom = scrollTop + outerHeight,
-                          scrollRight = scrollLeft + outerWidth,
+                      var overflowRegex = /(auto|scroll|hidden)/;
+                      var position = s.css( 'position' );
+                      var excludeStaticParent = position === 'absolute';
+                      var scrollParent = s.parents().filter( function() {
+                        var parent = $(this);
+                        if ( excludeStaticParent && parent.css( 'position' ) === 'static' ) {
+                          return false;
+                        }
+                        return (overflowRegex).test( parent.css( 'overflow' ) + parent.css( 'overflow-y' ) + parent.css( 'overflow-x' ) );
+                      });
+
+                      var p = position === 'fixed' || !scrollParent.length ? $(document) : scrollParent.first();
+
+                      var pOffset = p.offset(),
+                          pTop = pOffset ? pOffset.top : 0,
+                          pLeft = pOffset ? pOffset.left : 0,
+                          pBottom = pTop + p.height(),
+                          pRight = pLeft + p.width(),
                           offset = s.offset(),
-                          elBottom = offset.top + outerHeight,
-                          elRight = offset.left + outerWidth,
-                          visibleTop = offset.top < scrollTop ? scrollTop : offset.top,
-                          visibleLeft = offset.left < scrollLeft ? scrollLeft : offset.left,
-                          visibleBottom = elBottom > scrollBottom ? scrollBottom : elBottom,
-                          visibleRight = elRight > scrollRight ? scrollRight: elRight;
+                          elBottom = offset.top + s.outerHeight(),
+                          elRight = offset.left + s.outerWidth(),
+                          visibleTop = offset.top < pTop ? pTop : offset.top,
+                          visibleLeft = offset.left < pLeft ? pLeft : offset.left,
+                          visibleBottom = elBottom > pBottom ? pBottom : elBottom,
+                          visibleRight = elRight > pRight ? pRight: elRight;
+
                       return {
                         offsetTop: visibleTop,
                         offsetLeft: visibleLeft,
-                        width: visibleBottom - visibleTop,
-                        height: visibleRight - visibleLeft
+                        height: visibleBottom - visibleTop,
+                        width: visibleRight - visibleLeft
                       };
                     },
                     _position: function(a){
